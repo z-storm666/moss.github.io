@@ -2,5 +2,10 @@
     "title":"雒河桥南的博客",
     "subTitle":"我是雒河桥南，专注于自我提升",
     "avatarUrl":"https://tse2-mm.cn.bing.net/th/id/OIP-C.qCys2C8LjF8c3_UHbGOooAAAAA?rs=1&pid=ImgDetMain",
+    "allHead":"<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekBSZ.js'></script>",
+    "allHead":"<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekVercount.js'></script>",
+    "script":"<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekTOC.js'></script>",
+    "script":"<script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>",
+    "script":"<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekTOC.js'></script><script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>",
     "GMEEK_VERSION":"last"
 }
