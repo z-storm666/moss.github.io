@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <script src='https://blog.meekdai.com/Gmeek/plugins/GmeekVercount.js'></script>
+    <link rel="icon" href="https://tse2-mm.cn.bing.net/th/id/OIP-C.qCys2C8LjF8c3_UHbGOooAAAAA?rs=1&pid=ImgDetMain"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# 准备工作
+
+注册一个GitHub账号并登录。">
+<meta property="og:title" content="博客搭建教程1">
+<meta property="og:description" content="# 准备工作
+
+注册一个GitHub账号并登录。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://z-storm666.github.io/moss.github.io/post/bo-ke-da-jian-jiao-cheng-1.html">
+<meta property="og:image" content="https://tse2-mm.cn.bing.net/th/id/OIP-C.qCys2C8LjF8c3_UHbGOooAAAAA?rs=1&pid=ImgDetMain">
+<title>博客搭建教程1</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">博客搭建教程1</h1>
+<div class="title-right">
+    <a href="https://z-storm666.github.io/moss.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/z-storm666/moss.github.io/issues/2" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>准备工作</h1>
+<p>注册一个GitHub账号并登录。<br>
+GitHub的访问，使用瓦特工具箱加速，host文件需要修改（修改方法可以百度）。<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/308270843c9b1125c4c5e89cc44cde1a4ddbc24ba72ae0f8e0c708dde5a97a0b/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f31303561613132312d383730632d343931392d383130312d3433356161633732333265662e706e67"><img src="https://camo.githubusercontent.com/308270843c9b1125c4c5e89cc44cde1a4ddbc24ba72ae0f8e0c708dde5a97a0b/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f31303561613132312d383730632d343931392d383130312d3433356161633732333265662e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/105aa121-870c-4919-8101-435aac7232ef.png" style="max-width: 100%;"></a></p>
+<h1>超轻量级个人博客框架Gmeek</h1>
+<p>这是一个超轻量级个人博客模板。完全基于<code class="notranslate">Github Pages</code> 、 <code class="notranslate">Github Issues</code> 和 <code class="notranslate">Github Actions</code>。不需要本地部署，从搭建到写作，只需要18秒，2步搭建好博客，第3步就是写作。</p>
+<p>不需要写代码，不用服务器，也不用域名，全流程都使用Github提供的免费服务。其中博客主体使用Github Pages托管的静态页面，构建部署使用Github Action，写文章则使用github的issue的富文本编辑器。</p>
+<p><a href="https://github.com/Meekdai/Gmeek">Meekdai/Gmeek: Gmeek is a Blog All in Github</a></p>
+<h1>搭建步骤</h1>
+<p><strong>1、</strong><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a42c5d37e4435f6051459da44e846c5ede207bc1f26214722d3c9a42da8abb9b/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f36326163323565612d363163322d343830322d626636382d6534663064393161666137302e706e67"><img src="https://camo.githubusercontent.com/a42c5d37e4435f6051459da44e846c5ede207bc1f26214722d3c9a42da8abb9b/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f36326163323565612d363163322d343830322d626636382d6534663064393161666137302e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/62ac25ea-61c2-4802-bf68-e4f0d91afa70.png" style="max-width: 100%;"></a></p>
+<p><strong>2、</strong><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b1d24ba4a1a536a009fa7b58da5a40504b436d44165964a6c901ad67cc25d5fb/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f30343238663734662d633432652d343765612d626434362d6365616565376436386239652e706e67"><img src="https://camo.githubusercontent.com/b1d24ba4a1a536a009fa7b58da5a40504b436d44165964a6c901ad67cc25d5fb/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f30343238663734662d633432652d343765612d626434362d6365616565376436386239652e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/0428f74f-c42e-47ea-bd46-ceaee7d68b9e.png" style="max-width: 100%;"></a></p>
+<p><strong>3、</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bb0dcde0b6c34154fd9f04387111aa4baf4888a5b9f940c813afbe47cbb75fb2/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f30376664313134652d333837392d343739372d393230642d6562373333376536373730322e706e67"><img src="https://camo.githubusercontent.com/bb0dcde0b6c34154fd9f04387111aa4baf4888a5b9f940c813afbe47cbb75fb2/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f30376664313134652d333837392d343739372d393230642d6562373333376536373730322e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/07fd114e-3879-4797-920d-eb7337e67702.png" style="max-width: 100%;"></a><br>
+<strong>4、</strong><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a7d270e858e728f99c19dd6ebf2a2c091eba56dc631ab10824f82a4e9c8116b4/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f39313230343035642d306465642d346265352d396166352d3134363835643437346665332e706e67"><img src="https://camo.githubusercontent.com/a7d270e858e728f99c19dd6ebf2a2c091eba56dc631ab10824f82a4e9c8116b4/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f39313230343035642d306465642d346265352d396166352d3134363835643437346665332e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/9120405d-0ded-4be5-9af5-14685d474fe3.png" style="max-width: 100%;"></a></p>
+<p><strong>5、</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/147c23220e9524d74fd5ba9370f17615a34888e47e393499f53c42ab454c12c0/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f30363239633561392d346663332d346464352d623831392d3562353532393566666431342e706e67"><img src="https://camo.githubusercontent.com/147c23220e9524d74fd5ba9370f17615a34888e47e393499f53c42ab454c12c0/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f30363239633561392d346663332d346464352d623831392d3562353532393566666431342e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/0629c5a9-4fc3-4dd5-b819-5b55295ffd14.png" style="max-width: 100%;"></a><br>
+<strong>6、</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4c8f47a2729c3a5f92fdc56b52ef4a6aeb4dd0769f72b5e6e2a4d55243ff9702/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f62316138333965642d323838312d343638352d613064372d6263346133373639303535332e706e67"><img src="https://camo.githubusercontent.com/4c8f47a2729c3a5f92fdc56b52ef4a6aeb4dd0769f72b5e6e2a4d55243ff9702/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f62316138333965642d323838312d343638352d613064372d6263346133373639303535332e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/b1a839ed-2881-4685-a0d7-bc4a37690553.png" style="max-width: 100%;"></a></p>
+<p><strong>7、</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/731c920ede0d1b9c946a5b4a9b874a41d5c2b03e7532d244fe592666913e9831/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f31633964366362302d383137612d343636392d613865612d6438626561326533643033362e706e67"><img src="https://camo.githubusercontent.com/731c920ede0d1b9c946a5b4a9b874a41d5c2b03e7532d244fe592666913e9831/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f31633964366362302d383137612d343636392d613865612d6438626561326533643033362e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/1c9d6cb0-817a-4669-a8ea-d8bea2e3d036.png" style="max-width: 100%;"></a><br>
+<strong>8、</strong><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c251d78bfea6a1fed203812821f27c07f83423fcd352372374d6c448d35cb775/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f36646561373037322d386434372d343539622d396137372d3663306162396335353434612e706e67"><img src="https://camo.githubusercontent.com/c251d78bfea6a1fed203812821f27c07f83423fcd352372374d6c448d35cb775/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f36646561373037322d386434372d343539622d396137372d3663306162396335353434612e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/6dea7072-8d47-459b-9a77-6c0ab9c5544a.png" style="max-width: 100%;"></a></p>
+<p><strong>9、在这个页面就可以写作了</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e2d914ec9bbb892916f199b908ef3aabe2b27f5701fdf63151097a44d6d349f6/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f30383831343661342d303066352d343461652d383033352d6165613436356434373835392e706e67"><img src="https://camo.githubusercontent.com/e2d914ec9bbb892916f199b908ef3aabe2b27f5701fdf63151097a44d6d349f6/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f30383831343661342d303066352d343461652d383033352d6165613436356434373835392e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/088146a4-00f5-44ae-8035-aea465d47859.png" style="max-width: 100%;"></a></p>
+<p><strong>10、</strong><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/20c1195affcddaea238c8ebde0170b80bdf14a402ce7a4532df9a6f0fafcc328/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f63646366616638342d376436632d346461352d393438662d3138326463366435636532642e706e67"><img src="https://camo.githubusercontent.com/20c1195affcddaea238c8ebde0170b80bdf14a402ce7a4532df9a6f0fafcc328/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f63646366616638342d376436632d346461352d393438662d3138326463366435636532642e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/cdcfaf84-7d6c-4da5-948f-182dc6d5ce2d.png" style="max-width: 100%;"></a></p>
+<p><strong>11、</strong><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/087d00d4e5d46e6da78015858edafc41a36ce192d3c6c2025d881c5636e3bc65/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f36316663653833612d353837622d343961662d623134302d3430643735376461386434632e706e67"><img src="https://camo.githubusercontent.com/087d00d4e5d46e6da78015858edafc41a36ce192d3c6c2025d881c5636e3bc65/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f36316663653833612d353837622d343961662d623134302d3430643735376461386434632e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/61fce83a-587b-49af-b140-40d757da8d4c.png" style="max-width: 100%;"></a></p>
+<p><strong>12、回到首页</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/90cb063cb8c5fa04fc421b087bbc8b02bdec0cbe29e666212eb6608d290c0e21/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f34323838653035652d343766662d346566392d393939312d6462383663366433303536662e706e67"><img src="https://camo.githubusercontent.com/90cb063cb8c5fa04fc421b087bbc8b02bdec0cbe29e666212eb6608d290c0e21/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f34323838653035652d343766662d346566392d393939312d6462383663366433303536662e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/4288e05e-47ff-4ef9-9991-db86c6d3056f.png" style="max-width: 100%;"></a></p>
+<p><strong>13、</strong><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/11b48f245d9f10246b8bd263cb9939185588ea952da179c52f580d768c1359a9/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f38393037313532352d323562302d346365322d386135632d3661393561303837666663382e706e67"><img src="https://camo.githubusercontent.com/11b48f245d9f10246b8bd263cb9939185588ea952da179c52f580d768c1359a9/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f38393037313532352d323562302d346365322d386135632d3661393561303837666663382e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/89071525-25b0-4ce2-8a5c-6a95a087ffc8.png" style="max-width: 100%;"></a></p>
+<p><strong>14、</strong><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/05bf2a3716e7242534b5c4a88bf5ae4e9d2c7d71f587dac0fdd9bed943920c02/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f63383061363432632d366135392d346539642d613064622d3264633064376435613432382e706e67"><img src="https://camo.githubusercontent.com/05bf2a3716e7242534b5c4a88bf5ae4e9d2c7d71f587dac0fdd9bed943920c02/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f63383061363432632d366135392d346539642d613064622d3264633064376435613432382e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/c80a642c-6a59-4e9d-a0db-2dc0d7d5a428.png" style="max-width: 100%;"></a></p>
+<p><strong>15、演示站里有篇文章写的很好，推荐一下</strong><br>
+<a href="https://blog.meekdai.com/" rel="nofollow">blog.meekdai.com</a><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/92d0999a8923acc94dd4d3bc0cb8a338b0adc052f05307726989c576dfaa12c5/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f38643964613161342d303962302d343933642d623139392d3764326237613466313236362e706e67"><img src="https://camo.githubusercontent.com/92d0999a8923acc94dd4d3bc0cb8a338b0adc052f05307726989c576dfaa12c5/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f38643964613161342d303962302d343933642d623139392d3764326237613466313236362e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/8d9da1a4-09b0-493d-b199-7d2b7a4f1266.png" style="max-width: 100%;"></a></p>
+<h1>修改配置</h1>
+<p><strong>1、回到搭建步骤第13步所在的页面</strong><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/be83bd9033014598cf3536d260db68867e38f9d515d6465318931c7aa5ea20d5/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f37396261393939312d663938632d346435372d396539612d6331616566646333303536652e706e67"><img src="https://camo.githubusercontent.com/be83bd9033014598cf3536d260db68867e38f9d515d6465318931c7aa5ea20d5/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f37396261393939312d663938632d346435372d396539612d6331616566646333303536652e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/79ba9991-f98c-4d57-9e9a-c1aefdc3056e.png" style="max-width: 100%;"></a></p>
+<p><strong>2、</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4e174be09912ac371b7a28bf8208b7de008191534e02d9c9031d4cb4a1ac52df/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f38653937626462342d653434322d346338632d626464342d6430336164623635646665662e706e67"><img src="https://camo.githubusercontent.com/4e174be09912ac371b7a28bf8208b7de008191534e02d9c9031d4cb4a1ac52df/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f38653937626462342d653434322d346338632d626464342d6430336164623635646665662e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/8e97bdb4-e442-4c8c-bdd4-d03adb65dfef.png" style="max-width: 100%;"></a></p>
+<p><strong>3、</strong><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c3775ceac89d5eca1b6921c7b70fc60c890b7880752d4d585be796837a4c930c/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f61613335626233312d613135322d343061372d613835352d3833323966333365386435302e706e67"><img src="https://camo.githubusercontent.com/c3775ceac89d5eca1b6921c7b70fc60c890b7880752d4d585be796837a4c930c/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f61613335626233312d613135322d343061372d613835352d3833323966333365386435302e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/aa35bb31-a152-40a7-a855-8329f33e8d50.png" style="max-width: 100%;"></a><br>
+<strong>4、这里需要进行一次手动构建</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/587a7032f8636a8e1d4edd344789e1202550591cc35970f3054d5421c51a6098/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f31323361333932612d633132612d346135312d623266342d3566643763663564663963632e706e67"><img src="https://camo.githubusercontent.com/587a7032f8636a8e1d4edd344789e1202550591cc35970f3054d5421c51a6098/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f31323361333932612d633132612d346135312d623266342d3566643763663564663963632e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/123a392a-c12a-4a51-b2f4-5fd7cf5df9cc.png" style="max-width: 100%;"></a></p>
+<p><strong>5、打开刚才的网页，就会发现，刚才的更改生效了</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1ae4518289dfbf39e58bd52d98aaaed034e5150258c779872acdaa1ae9263047/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f31383838396431642d303735662d346535352d396137622d3861343530383332613464662e706e67"><img src="https://camo.githubusercontent.com/1ae4518289dfbf39e58bd52d98aaaed034e5150258c779872acdaa1ae9263047/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f31383838396431642d303735662d346535352d396137622d3861343530383332613464662e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/18889d1d-075f-4e55-9a7b-8a450832a4df.png" style="max-width: 100%;"></a></p>
+<p><strong>6、自定义域名（可有可无）</strong><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fdf5c8d2df8a8222b656490bbfcf6afdcb2e124eeb900c3567d0d234d2588651/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f37633335306639662d336538322d343330622d613638652d3530326439386634363333662e706e67"><img src="https://camo.githubusercontent.com/fdf5c8d2df8a8222b656490bbfcf6afdcb2e124eeb900c3567d0d234d2588651/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f34373436372f37633335306639662d336538322d343330622d613638652d3530326439386634363333662e706e67" alt="" data-canonical-src="https://files.mdnice.com/user/47467/7c350f9f-3e82-430b-a68e-502d98f4633f.png" style="max-width: 100%;"></a></p></div>
+<div style="font-size:small;margin-top:8px;float:right;"></div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://z-storm666.github.io/moss.github.io">雒河桥南的博客</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","z-storm666/moss.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekTOC.js'></script><script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>
+
+</html>
