@@ -3,7 +3,7 @@
     "avatarUrl":"https://tse2-mm.cn.bing.net/th/id/OIP-C.qCys2C8LjF8c3_UHbGOooAAAAA?rs=1&pid=ImgDetMain",
     "GMEEK_VERSION":"last",
     "displayTitle":"MOSS",
-    "homeUrl":"https://blog.freeblock.cn",
+    "homeUrl":"https://z-storm666.github.io/moss.github.io",
     "subTitle":"我是雒河桥南，专注于自我提升",
     "onePageListNum":15,
     "i18n":"CN",
@@ -17,9 +17,9 @@
     "urlMode":"issue",
     "showPostSource":0,
     "needComment":0,
-    "indexScript":"<script src='https://blog.freeblock.cn/assets/yifantheme_index.js'></script><script src='https://blog.freeblock.cn/assets/rain.js'></script>",
+    "indexScript":"<script src='https://z-storm666.github.io/moss.github.io/assets/yifantheme_index.js'></script><script src='https://z-storm666.github.io/moss.github.io/assets/rain.js'></script>",
     "bottomText":"❤️ 转载文章请注明出处，谢谢！❤️",
-    "allHead":"<script src='https://blog.freeblock.cn/assets/lazyload.js'></script>",
-    "script":"<script src='https://blog.freeblock.cn/assets/articletoc.js'></script><script src='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js'></script><script>var imgLinks = document.querySelectorAll('a > img');imgLinks.forEach(function(imgLink){var parentLink = imgLink.parentElement;parentLink.parentNode.insertBefore(parentLink.removeChild(imgLink), parentLink);parentLink.parentNode.removeChild(parentLink);});mediumZoom('img');</script>"
+    "allHead":"<script src='https://z-storm666.github.io/moss.github.io/assets/lazyload.js'></script>",
+    "script":"<script src='https://z-storm666.github.io/moss.github.io/assets/articletoc.js'></script><script src='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js'></script><script>var imgLinks = document.querySelectorAll('a > img');imgLinks.forEach(function(imgLink){var parentLink = imgLink.parentElement;parentLink.parentNode.insertBefore(parentLink.removeChild(imgLink), parentLink);parentLink.parentNode.removeChild(parentLink);});mediumZoom('img');</script>"
 
 }
