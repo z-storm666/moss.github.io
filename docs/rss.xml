@@ -1,5 +1,25 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>雒河桥南的博客</title><link>https://z-storm666.github.io/moss.github.io</link><description>我是雒河桥南，专注于自我提升</description><copyright>雒河桥南的博客</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://tse2-mm.cn.bing.net/th/id/OIP-C.qCys2C8LjF8c3_UHbGOooAAAAA?rs=1&amp;pid=ImgDetMain</url><title>avatar</title><link>https://z-storm666.github.io/moss.github.io</link></image><lastBuildDate>Sun, 04 Aug 2024 13:00:47 +0000</lastBuildDate><managingEditor>雒河桥南的博客</managingEditor><ttl>60</ttl><webMaster>雒河桥南的博客</webMaster><item><title>仪器仪表</title><link>https://z-storm666.github.io/moss.github.io/post/yi-qi-yi-biao.html</link><description># 数字万用表&#13;
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>雒河桥南的博客</title><link>https://z-storm666.github.io/moss.github.io</link><description>我是雒河桥南，专注于自我提升</description><copyright>雒河桥南的博客</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://tse2-mm.cn.bing.net/th/id/OIP-C.qCys2C8LjF8c3_UHbGOooAAAAA?rs=1&amp;pid=ImgDetMain</url><title>avatar</title><link>https://z-storm666.github.io/moss.github.io</link></image><lastBuildDate>Sun, 04 Aug 2024 13:15:51 +0000</lastBuildDate><managingEditor>雒河桥南的博客</managingEditor><ttl>60</ttl><webMaster>雒河桥南的博客</webMaster><item><title>关于Gmeek 博客 - 代码、主页设置的萌新教程</title><link>https://z-storm666.github.io/moss.github.io/post/guan-yu-Gmeek%20-bo-ke-%20-%20-dai-ma-%E3%80%81-zhu-ye-she-zhi-de-meng-xin-jiao-cheng.html</link><description># 一、关于Gmeek 博客 - 代码、主页设置的萌新教程&#13;
+[关于Gmeek 博客 - 代码、主页设置的萌新教程](https://diyingisader.github.io/zang_diying.github.io/post/guan-yu-Gmeek%20-bo-ke-%20-%20-dai-ma-%E3%80%81-zhu-ye-she-zhi-de-meng-xin-jiao-cheng.html)&#13;
+# 二、官方&#13;
+[Gmeek官方网站](https://meekdai.com/Gmeek.html)&#13;
+&#13;
+[Gmeek快速上手](https://blog.meekdai.com/post/Gmeek-kuai-su-shang-shou.html)&#13;
+&#13;
+[Gmeek的GitHub仓库](https://github.com/Meekdai/Gmeek)&#13;
+&#13;
+[Gmeek更新日志](https://blog.meekdai.com/post/Gmeek-geng-xin-ri-zhi.html)&#13;
+&#13;
+# 三、博客&#13;
+[Gmeek的Demo博客](https://blog.meekdai.com/)&#13;
+&#13;
+[Zang.帝樱的博客](https://diyingisader.github.io/zang_diying.github.io/)&#13;
+&#13;
+# 四、blog美化案例-----抽空学一下（涉及到前端--不懂）&#13;
+https://github.com/[cao-gift/cao-gift.github.io](https://github.com/cao-gift/cao-gift.github.io)&#13;
+&#13;
+[星源笔记](https://blog.freeblock.cn/)&#13;
+。</description><guid isPermaLink="true">https://z-storm666.github.io/moss.github.io/post/guan-yu-Gmeek%20-bo-ke-%20-%20-dai-ma-%E3%80%81-zhu-ye-she-zhi-de-meng-xin-jiao-cheng.html</guid><pubDate>Sun, 04 Aug 2024 13:15:28 +0000</pubDate></item><item><title>仪器仪表</title><link>https://z-storm666.github.io/moss.github.io/post/yi-qi-yi-biao.html</link><description># 数字万用表&#13;
 [用 &lt;iframe&gt; 在 HTML 中插入B站视频的方法](https://perrykum.github.io/rtcls/study/bliframe/bliframe.html)&#13;
 `Gmeek-html&lt;iframe src='//player.bilibili.com/player.html?isOutside=true&amp;aid=516668981&amp;bvid=BV1ig411a7wp&amp;cid=888159635&amp;p=1' scrolling='no' border='0' frameborder='no' framespacing='0' allowfullscreen='true' width='100%' height='460px'&gt;&lt;/iframe&gt;`&#13;
 ![image](https://github.com/user-attachments/assets/72dfa64f-9c67-43b0-8919-e1a31d86b3d6)&#13;
