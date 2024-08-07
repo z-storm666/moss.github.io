@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <script src='https://blog.meekdai.com/Gmeek/plugins/GmeekVercount.js'></script>
+    <link rel="icon" href="https://tse2-mm.cn.bing.net/th/id/OIP-C.qCys2C8LjF8c3_UHbGOooAAAAA?rs=1&pid=ImgDetMain"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# 7月26日
+
+```c
+#include <stdio.h>
+
+#include 'common/sample_common.h'
+#include 'librtsp/rtsp_demo.h'
+#include 'rkmedia_api.h'
+#include 'rkmedia_venc.h'
+rtsp_demo_handle g_rtsplive = NULL;
+rtsp_session_handle g_rtsp_session;
+uint8_t *data;
+size_t datasize;
+int num =0;
+//9注册输出回调函数
+void my_OutCbFunc(MEDIA_BUFFER mb)
+{
+    num++;
+    printf('num is %d\r\n',num);
+   //11推流----将数据发送到服务器---rtsp
+   //获取数据
+   data=RK_MPI_MB_GetPtr(mb);
+   //获取数据的大小
+   datasize=RK_MPI_MB_GetSize(mb);
+   //推流
+   rtsp_tx_video(g_rtsp_session, data, datasize,RK_MPI_MB_GetTimestamp(mb));
+   rtsp_do_event(g_rtsplive);
+   //释放数据缓冲区
+   RK_MPI_MB_ReleaseBuffer(mb);
+
+}
+
+int main (void)
+{
+     //ISP配置
+  //   rk_aiq_working_mode_t hdr_mode = RK_AIQ_WORKING_MODE_NORMAL;
+  //   int fps = 30;
+  //  SAMPLE_COMM_ISP_Init(0, hdr_mode, RK_FALSE, '/oem/etc/iqfiles');
+  //   SAMPLE_COMM_ISP_Run(0);
+  //   SAMPLE_COMM_ISP_SetFrameRate(0, fps);
+    //rtsp配置
+    g_rtsplive = create_rtsp_demo(554);
+    g_rtsp_session = rtsp_new_session(g_rtsplive, '/live/main_stream');
+    rtsp_set_video(g_rtsp_session, RTSP_CODEC_ID_VIDEO_H264, NULL, 0);
+    rtsp_sync_video_ts(g_rtsp_session, rtsp_get_reltime(), rtsp_get_ntptime());
+  //1初始化系统
+  RK_MPI_SYS_Init();
+  //3填充VI通道属性
+  VI_CHN_ATTR_S pstChnAttr={0};
+  pstChnAttr.enBufType=VI_CHN_BUF_TYPE_MMAP ;  //数据传输模式 -手册
+  pstChnAttr.enPixFmt=IMAGE_TYPE_NV12;    //图像格式 -例程
+  pstChnAttr.enWorkMode=VI_WORK_MODE_NORMAL;   //工作模式 -例程
+  pstChnAttr.pcVideoNode='rkispp_scale0'; //节点路径
+  //V4L2摄像头开发中用到的知识 3-5
+  pstChnAttr.u32BufCnt=3;    //缓冲区个数
+  pstChnAttr.u32Height=768;    //图像高度
+  pstChnAttr.u32Width=1024;     //图像宽度
+  
+  //2设置VI通道属性
+  RK_MPI_VI_SetChnAttr(0,0,&pstChnAttr);
+  RK_MPI_VI_EnableChn(0,0);
+  //6创建编码器核心结构体
+  VENC_CHN_ATTR_S stVencChnAttr ={0};
+
+  stVencChnAttr.stRcAttr.enRcMode=VENC_RC_MODE_H264CBR ;
+  stVencChnAttr.stRcAttr.stH264Cbr.fr32DstFrameRateDen=1 ;
+  stVencChnAttr.stRcAttr.stH264Cbr.fr32DstFrameRateNum=30;
+  stVencChnAttr.stRcAttr.stH264Cbr.u32BitRate=1024*768;
+  //I帧间隔
+  stVencChnAttr.stRcAttr.stH264Cbr.u32Gop=30;
+  //源图像的分母
+  stVencChnAttr.stRcAttr.stH264Cbr.u32SrcFrameRateDen=1;
+  //源图像的分子
+  stVencChnAttr.stRcAttr.stH264Cbr.u32SrcFrameRateNum=30;
+
+  //使用的编码器
+  stVencChnAttr.stVencAttr.enType= RK_CODEC_TYPE_H264;
+  //输入图片类型
+  stVencChnAttr.stVencAttr.imageType=IMAGE_TYPE_NV12 ;
+  stVencChnAttr.stVencAttr.u32PicHeight=768;
+  stVencChnAttr.stVencAttr.u32PicWidth=1024;
+  //编码等级----选择正常
+  stVencChnAttr.stVencAttr.u32Profile=77;
+  stVencChnAttr.stVencAttr.u32VirHeight=768;
+  stVencChnAttr.stVencAttr.u32VirWidth=1024;
+ 
+  //5创建编码通道
+  RK_MPI_VENC_CreateChn(0,&stVencChnAttr);
+  //8数据来源通道
+  MPP_CHN_S pstChn ={0};
+  //推流数据来自VENC
+  pstChn.enModId=RK_ID_VENC;
+  pstChn.s32ChnId=0;//当前只有通道0
+  pstChn.s32DevId=0;
+  
+  //7注册数据输出回调
+  RK_MPI_SYS_RegisterOutCb(&pstChn,my_OutCbFunc);
+
+  MPP_CHN_S pstSrcChn ={0};
+  pstSrcChn.enModId = RK_ID_VI;
+  pstSrcChn.s32ChnId=0;//当前只有通道0
+  pstSrcChn.s32DevId=0;
+  //10绑定-----将VI和VENC建立联系
+  RK_MPI_SYS_Bind(&pstSrcChn,&pstChn);
+  while(1)
+  {
+   usleep(30000);
+  }
+    RK_MPI_SYS_UnBind(&pstSrcChn,&pstChn);
+	RK_MPI_VENC_DestroyChn(0);
+	RK_MPI_VI_DisableChn(0,0);
+  return 0;
+}
+```
+
+# 7月29日
+
+```c
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include 'rkmedia_api.h'
+#include <time.h>
+
+
+int main (void)
+{
+  //1初始化Rockchip的多媒体处理接口。">
+<meta property="og:title" content="程序">
+<meta property="og:description" content="# 7月26日
+
+```c
+#include <stdio.h>
+
+#include 'common/sample_common.h'
+#include 'librtsp/rtsp_demo.h'
+#include 'rkmedia_api.h'
+#include 'rkmedia_venc.h'
+rtsp_demo_handle g_rtsplive = NULL;
+rtsp_session_handle g_rtsp_session;
+uint8_t *data;
+size_t datasize;
+int num =0;
+//9注册输出回调函数
+void my_OutCbFunc(MEDIA_BUFFER mb)
+{
+    num++;
+    printf('num is %d\r\n',num);
+   //11推流----将数据发送到服务器---rtsp
+   //获取数据
+   data=RK_MPI_MB_GetPtr(mb);
+   //获取数据的大小
+   datasize=RK_MPI_MB_GetSize(mb);
+   //推流
+   rtsp_tx_video(g_rtsp_session, data, datasize,RK_MPI_MB_GetTimestamp(mb));
+   rtsp_do_event(g_rtsplive);
+   //释放数据缓冲区
+   RK_MPI_MB_ReleaseBuffer(mb);
+
+}
+
+int main (void)
+{
+     //ISP配置
+  //   rk_aiq_working_mode_t hdr_mode = RK_AIQ_WORKING_MODE_NORMAL;
+  //   int fps = 30;
+  //  SAMPLE_COMM_ISP_Init(0, hdr_mode, RK_FALSE, '/oem/etc/iqfiles');
+  //   SAMPLE_COMM_ISP_Run(0);
+  //   SAMPLE_COMM_ISP_SetFrameRate(0, fps);
+    //rtsp配置
+    g_rtsplive = create_rtsp_demo(554);
+    g_rtsp_session = rtsp_new_session(g_rtsplive, '/live/main_stream');
+    rtsp_set_video(g_rtsp_session, RTSP_CODEC_ID_VIDEO_H264, NULL, 0);
+    rtsp_sync_video_ts(g_rtsp_session, rtsp_get_reltime(), rtsp_get_ntptime());
+  //1初始化系统
+  RK_MPI_SYS_Init();
+  //3填充VI通道属性
+  VI_CHN_ATTR_S pstChnAttr={0};
+  pstChnAttr.enBufType=VI_CHN_BUF_TYPE_MMAP ;  //数据传输模式 -手册
+  pstChnAttr.enPixFmt=IMAGE_TYPE_NV12;    //图像格式 -例程
+  pstChnAttr.enWorkMode=VI_WORK_MODE_NORMAL;   //工作模式 -例程
+  pstChnAttr.pcVideoNode='rkispp_scale0'; //节点路径
+  //V4L2摄像头开发中用到的知识 3-5
+  pstChnAttr.u32BufCnt=3;    //缓冲区个数
+  pstChnAttr.u32Height=768;    //图像高度
+  pstChnAttr.u32Width=1024;     //图像宽度
+  
+  //2设置VI通道属性
+  RK_MPI_VI_SetChnAttr(0,0,&pstChnAttr);
+  RK_MPI_VI_EnableChn(0,0);
+  //6创建编码器核心结构体
+  VENC_CHN_ATTR_S stVencChnAttr ={0};
+
+  stVencChnAttr.stRcAttr.enRcMode=VENC_RC_MODE_H264CBR ;
+  stVencChnAttr.stRcAttr.stH264Cbr.fr32DstFrameRateDen=1 ;
+  stVencChnAttr.stRcAttr.stH264Cbr.fr32DstFrameRateNum=30;
+  stVencChnAttr.stRcAttr.stH264Cbr.u32BitRate=1024*768;
+  //I帧间隔
+  stVencChnAttr.stRcAttr.stH264Cbr.u32Gop=30;
+  //源图像的分母
+  stVencChnAttr.stRcAttr.stH264Cbr.u32SrcFrameRateDen=1;
+  //源图像的分子
+  stVencChnAttr.stRcAttr.stH264Cbr.u32SrcFrameRateNum=30;
+
+  //使用的编码器
+  stVencChnAttr.stVencAttr.enType= RK_CODEC_TYPE_H264;
+  //输入图片类型
+  stVencChnAttr.stVencAttr.imageType=IMAGE_TYPE_NV12 ;
+  stVencChnAttr.stVencAttr.u32PicHeight=768;
+  stVencChnAttr.stVencAttr.u32PicWidth=1024;
+  //编码等级----选择正常
+  stVencChnAttr.stVencAttr.u32Profile=77;
+  stVencChnAttr.stVencAttr.u32VirHeight=768;
+  stVencChnAttr.stVencAttr.u32VirWidth=1024;
+ 
+  //5创建编码通道
+  RK_MPI_VENC_CreateChn(0,&stVencChnAttr);
+  //8数据来源通道
+  MPP_CHN_S pstChn ={0};
+  //推流数据来自VENC
+  pstChn.enModId=RK_ID_VENC;
+  pstChn.s32ChnId=0;//当前只有通道0
+  pstChn.s32DevId=0;
+  
+  //7注册数据输出回调
+  RK_MPI_SYS_RegisterOutCb(&pstChn,my_OutCbFunc);
+
+  MPP_CHN_S pstSrcChn ={0};
+  pstSrcChn.enModId = RK_ID_VI;
+  pstSrcChn.s32ChnId=0;//当前只有通道0
+  pstSrcChn.s32DevId=0;
+  //10绑定-----将VI和VENC建立联系
+  RK_MPI_SYS_Bind(&pstSrcChn,&pstChn);
+  while(1)
+  {
+   usleep(30000);
+  }
+    RK_MPI_SYS_UnBind(&pstSrcChn,&pstChn);
+	RK_MPI_VENC_DestroyChn(0);
+	RK_MPI_VI_DisableChn(0,0);
+  return 0;
+}
+```
+
+# 7月29日
+
+```c
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include 'rkmedia_api.h'
+#include <time.h>
+
+
+int main (void)
+{
+  //1初始化Rockchip的多媒体处理接口。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://z-storm666.github.io/moss.github.io/post/cheng-xu.html">
+<meta property="og:image" content="https://tse2-mm.cn.bing.net/th/id/OIP-C.qCys2C8LjF8c3_UHbGOooAAAAA?rs=1&pid=ImgDetMain">
+<title>程序</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">程序</h1>
+<div class="title-right">
+    <a href="https://z-storm666.github.io/moss.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/z-storm666/moss.github.io/issues/9" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>7月26日</h1>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+
+<span class="pl-k">#include</span> <span class="pl-s">"common/sample_common.h"</span>
+<span class="pl-k">#include</span> <span class="pl-s">"librtsp/rtsp_demo.h"</span>
+<span class="pl-k">#include</span> <span class="pl-s">"rkmedia_api.h"</span>
+<span class="pl-k">#include</span> <span class="pl-s">"rkmedia_venc.h"</span>
+<span class="pl-smi">rtsp_demo_handle</span> <span class="pl-s1">g_rtsplive</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+<span class="pl-smi">rtsp_session_handle</span> <span class="pl-s1">g_rtsp_session</span>;
+<span class="pl-smi">uint8_t</span> <span class="pl-c1">*</span><span class="pl-s1">data</span>;
+<span class="pl-smi">size_t</span> <span class="pl-s1">datasize</span>;
+<span class="pl-smi">int</span> <span class="pl-s1">num</span> <span class="pl-c1">=</span><span class="pl-c1">0</span>;
+<span class="pl-c">//9注册输出回调函数</span>
+<span class="pl-smi">void</span> <span class="pl-en">my_OutCbFunc</span>(<span class="pl-smi">MEDIA_BUFFER</span> <span class="pl-s1">mb</span>)
+{
+    <span class="pl-s1">num</span><span class="pl-c1">++</span>;
+    <span class="pl-en">printf</span>(<span class="pl-s">"num is %d\r\n"</span>,<span class="pl-s1">num</span>);
+   <span class="pl-c">//11推流----将数据发送到服务器---rtsp</span>
+   <span class="pl-c">//获取数据</span>
+   <span class="pl-s1">data</span><span class="pl-c1">=</span><span class="pl-en">RK_MPI_MB_GetPtr</span>(<span class="pl-s1">mb</span>);
+   <span class="pl-c">//获取数据的大小</span>
+   <span class="pl-s1">datasize</span><span class="pl-c1">=</span><span class="pl-en">RK_MPI_MB_GetSize</span>(<span class="pl-s1">mb</span>);
+   <span class="pl-c">//推流</span>
+   <span class="pl-en">rtsp_tx_video</span>(<span class="pl-s1">g_rtsp_session</span>, <span class="pl-s1">data</span>, <span class="pl-s1">datasize</span>,<span class="pl-en">RK_MPI_MB_GetTimestamp</span>(<span class="pl-s1">mb</span>));
+   <span class="pl-en">rtsp_do_event</span>(<span class="pl-s1">g_rtsplive</span>);
+   <span class="pl-c">//释放数据缓冲区</span>
+   <span class="pl-en">RK_MPI_MB_ReleaseBuffer</span>(<span class="pl-s1">mb</span>);
+
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span> (<span class="pl-smi">void</span>)
+{
+     <span class="pl-c">//ISP配置</span>
+  <span class="pl-c">//   rk_aiq_working_mode_t hdr_mode = RK_AIQ_WORKING_MODE_NORMAL;</span>
+  <span class="pl-c">//   int fps = 30;</span>
+  <span class="pl-c">//  SAMPLE_COMM_ISP_Init(0, hdr_mode, RK_FALSE, "/oem/etc/iqfiles");</span>
+  <span class="pl-c">//   SAMPLE_COMM_ISP_Run(0);</span>
+  <span class="pl-c">//   SAMPLE_COMM_ISP_SetFrameRate(0, fps);</span>
+    <span class="pl-c">//rtsp配置</span>
+    <span class="pl-s1">g_rtsplive</span> <span class="pl-c1">=</span> <span class="pl-en">create_rtsp_demo</span>(<span class="pl-c1">554</span>);
+    <span class="pl-s1">g_rtsp_session</span> <span class="pl-c1">=</span> <span class="pl-en">rtsp_new_session</span>(<span class="pl-s1">g_rtsplive</span>, <span class="pl-s">"/live/main_stream"</span>);
+    <span class="pl-en">rtsp_set_video</span>(<span class="pl-s1">g_rtsp_session</span>, <span class="pl-c1">RTSP_CODEC_ID_VIDEO_H264</span>, <span class="pl-c1">NULL</span>, <span class="pl-c1">0</span>);
+    <span class="pl-en">rtsp_sync_video_ts</span>(<span class="pl-s1">g_rtsp_session</span>, <span class="pl-en">rtsp_get_reltime</span>(), <span class="pl-en">rtsp_get_ntptime</span>());
+  <span class="pl-c">//1初始化系统</span>
+  <span class="pl-en">RK_MPI_SYS_Init</span>();
+  <span class="pl-c">//3填充VI通道属性</span>
+  <span class="pl-smi">VI_CHN_ATTR_S</span> <span class="pl-s1">pstChnAttr</span><span class="pl-c1">=</span>{<span class="pl-c1">0</span>};
+  <span class="pl-s1">pstChnAttr</span>.<span class="pl-c1">enBufType</span><span class="pl-c1">=</span><span class="pl-c1">VI_CHN_BUF_TYPE_MMAP</span> ;  <span class="pl-c">//数据传输模式 -手册</span>
+  <span class="pl-s1">pstChnAttr</span>.<span class="pl-c1">enPixFmt</span><span class="pl-c1">=</span><span class="pl-c1">IMAGE_TYPE_NV12</span>;    <span class="pl-c">//图像格式 -例程</span>
+  <span class="pl-s1">pstChnAttr</span>.<span class="pl-c1">enWorkMode</span><span class="pl-c1">=</span><span class="pl-c1">VI_WORK_MODE_NORMAL</span>;   <span class="pl-c">//工作模式 -例程</span>
+  <span class="pl-s1">pstChnAttr</span>.<span class="pl-c1">pcVideoNode</span><span class="pl-c1">=</span><span class="pl-s">"rkispp_scale0"</span>; <span class="pl-c">//节点路径</span>
+  <span class="pl-c">//V4L2摄像头开发中用到的知识 3-5</span>
+  <span class="pl-s1">pstChnAttr</span>.<span class="pl-c1">u32BufCnt</span><span class="pl-c1">=</span><span class="pl-c1">3</span>;    <span class="pl-c">//缓冲区个数</span>
+  <span class="pl-s1">pstChnAttr</span>.<span class="pl-c1">u32Height</span><span class="pl-c1">=</span><span class="pl-c1">768</span>;    <span class="pl-c">//图像高度</span>
+  <span class="pl-s1">pstChnAttr</span>.<span class="pl-c1">u32Width</span><span class="pl-c1">=</span><span class="pl-c1">1024</span>;     <span class="pl-c">//图像宽度</span>
+  
+  <span class="pl-c">//2设置VI通道属性</span>
+  <span class="pl-en">RK_MPI_VI_SetChnAttr</span>(<span class="pl-c1">0</span>,<span class="pl-c1">0</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">pstChnAttr</span>);
+  <span class="pl-en">RK_MPI_VI_EnableChn</span>(<span class="pl-c1">0</span>,<span class="pl-c1">0</span>);
+  <span class="pl-c">//6创建编码器核心结构体</span>
+  <span class="pl-smi">VENC_CHN_ATTR_S</span> <span class="pl-s1">stVencChnAttr</span> <span class="pl-c1">=</span>{<span class="pl-c1">0</span>};
+
+  <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stRcAttr</span>.<span class="pl-c1">enRcMode</span><span class="pl-c1">=</span><span class="pl-c1">VENC_RC_MODE_H264CBR</span> ;
+  <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stRcAttr</span>.<span class="pl-c1">stH264Cbr</span>.<span class="pl-c1">fr32DstFrameRateDen</span><span class="pl-c1">=</span><span class="pl-c1">1</span> ;
+  <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stRcAttr</span>.<span class="pl-c1">stH264Cbr</span>.<span class="pl-c1">fr32DstFrameRateNum</span><span class="pl-c1">=</span><span class="pl-c1">30</span>;
+  <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stRcAttr</span>.<span class="pl-c1">stH264Cbr</span>.<span class="pl-c1">u32BitRate</span><span class="pl-c1">=</span><span class="pl-c1">1024</span><span class="pl-c1">*</span><span class="pl-c1">768</span>;
+  <span class="pl-c">//I帧间隔</span>
+  <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stRcAttr</span>.<span class="pl-c1">stH264Cbr</span>.<span class="pl-c1">u32Gop</span><span class="pl-c1">=</span><span class="pl-c1">30</span>;
+  <span class="pl-c">//源图像的分母</span>
+  <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stRcAttr</span>.<span class="pl-c1">stH264Cbr</span>.<span class="pl-c1">u32SrcFrameRateDen</span><span class="pl-c1">=</span><span class="pl-c1">1</span>;
+  <span class="pl-c">//源图像的分子</span>
+  <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stRcAttr</span>.<span class="pl-c1">stH264Cbr</span>.<span class="pl-c1">u32SrcFrameRateNum</span><span class="pl-c1">=</span><span class="pl-c1">30</span>;
+
+  <span class="pl-c">//使用的编码器</span>
+  <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stVencAttr</span>.<span class="pl-c1">enType</span><span class="pl-c1">=</span> <span class="pl-c1">RK_CODEC_TYPE_H264</span>;
+  <span class="pl-c">//输入图片类型</span>
+  <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stVencAttr</span>.<span class="pl-c1">imageType</span><span class="pl-c1">=</span><span class="pl-c1">IMAGE_TYPE_NV12</span> ;
+  <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stVencAttr</span>.<span class="pl-c1">u32PicHeight</span><span class="pl-c1">=</span><span class="pl-c1">768</span>;
+  <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stVencAttr</span>.<span class="pl-c1">u32PicWidth</span><span class="pl-c1">=</span><span class="pl-c1">1024</span>;
+  <span class="pl-c">//编码等级----选择正常</span>
+  <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stVencAttr</span>.<span class="pl-c1">u32Profile</span><span class="pl-c1">=</span><span class="pl-c1">77</span>;
+  <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stVencAttr</span>.<span class="pl-c1">u32VirHeight</span><span class="pl-c1">=</span><span class="pl-c1">768</span>;
+  <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stVencAttr</span>.<span class="pl-c1">u32VirWidth</span><span class="pl-c1">=</span><span class="pl-c1">1024</span>;
+ 
+  <span class="pl-c">//5创建编码通道</span>
+  <span class="pl-en">RK_MPI_VENC_CreateChn</span>(<span class="pl-c1">0</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">stVencChnAttr</span>);
+  <span class="pl-c">//8数据来源通道</span>
+  <span class="pl-smi">MPP_CHN_S</span> <span class="pl-s1">pstChn</span> <span class="pl-c1">=</span>{<span class="pl-c1">0</span>};
+  <span class="pl-c">//推流数据来自VENC</span>
+  <span class="pl-s1">pstChn</span>.<span class="pl-c1">enModId</span><span class="pl-c1">=</span><span class="pl-c1">RK_ID_VENC</span>;
+  <span class="pl-s1">pstChn</span>.<span class="pl-c1">s32ChnId</span><span class="pl-c1">=</span><span class="pl-c1">0</span>;<span class="pl-c">//当前只有通道0</span>
+  <span class="pl-s1">pstChn</span>.<span class="pl-c1">s32DevId</span><span class="pl-c1">=</span><span class="pl-c1">0</span>;
+  
+  <span class="pl-c">//7注册数据输出回调</span>
+  <span class="pl-en">RK_MPI_SYS_RegisterOutCb</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">pstChn</span>,<span class="pl-s1">my_OutCbFunc</span>);
+
+  <span class="pl-smi">MPP_CHN_S</span> <span class="pl-s1">pstSrcChn</span> <span class="pl-c1">=</span>{<span class="pl-c1">0</span>};
+  <span class="pl-s1">pstSrcChn</span>.<span class="pl-c1">enModId</span> <span class="pl-c1">=</span> <span class="pl-c1">RK_ID_VI</span>;
+  <span class="pl-s1">pstSrcChn</span>.<span class="pl-c1">s32ChnId</span><span class="pl-c1">=</span><span class="pl-c1">0</span>;<span class="pl-c">//当前只有通道0</span>
+  <span class="pl-s1">pstSrcChn</span>.<span class="pl-c1">s32DevId</span><span class="pl-c1">=</span><span class="pl-c1">0</span>;
+  <span class="pl-c">//10绑定-----将VI和VENC建立联系</span>
+  <span class="pl-en">RK_MPI_SYS_Bind</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">pstSrcChn</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">pstChn</span>);
+  <span class="pl-k">while</span>(<span class="pl-c1">1</span>)
+  {
+   <span class="pl-en">usleep</span>(<span class="pl-c1">30000</span>);
+  }
+    <span class="pl-en">RK_MPI_SYS_UnBind</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">pstSrcChn</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">pstChn</span>);
+	<span class="pl-en">RK_MPI_VENC_DestroyChn</span>(<span class="pl-c1">0</span>);
+	<span class="pl-en">RK_MPI_VI_DisableChn</span>(<span class="pl-c1">0</span>,<span class="pl-c1">0</span>);
+  <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h1>7月29日</h1>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-k">#include</span> <span class="pl-s">&lt;stdint.h&gt;</span>
+<span class="pl-k">#include</span> <span class="pl-s">&lt;stdlib.h&gt;</span>
+<span class="pl-k">#include</span> <span class="pl-s">"rkmedia_api.h"</span>
+<span class="pl-k">#include</span> <span class="pl-s">&lt;time.h&gt;</span>
+
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span> (<span class="pl-smi">void</span>)
+{
+  <span class="pl-c">//1初始化Rockchip的多媒体处理接口。</span>
+ <span class="pl-en">RK_MPI_SYS_Init</span>();
+
+
+ <span class="pl-smi">AI_CHN_ATTR_S</span> <span class="pl-s1">pstAttr</span><span class="pl-c1">=</span>{<span class="pl-c1">0</span>};
+ <span class="pl-s1">pstAttr</span>.<span class="pl-c1">enAiLayout</span><span class="pl-c1">=</span><span class="pl-c1">AI_LAYOUT_NORMAL</span> ;
+ <span class="pl-s1">pstAttr</span>.<span class="pl-c1">enSampleFormat</span><span class="pl-c1">=</span><span class="pl-c1">RK_SAMPLE_FMT_S16</span> ;
+ <span class="pl-c">//</span>
+ <span class="pl-s1">pstAttr</span>.<span class="pl-c1">pcAudioNode</span><span class="pl-c1">=</span> <span class="pl-s">"plughw:1,0"</span>;
+ <span class="pl-s1">pstAttr</span>.<span class="pl-c1">u32Channels</span><span class="pl-c1">=</span> <span class="pl-c1">2</span>;
+ <span class="pl-s1">pstAttr</span>.<span class="pl-c1">u32NbSamples</span><span class="pl-c1">=</span> <span class="pl-c1">1024</span>;
+ <span class="pl-s1">pstAttr</span>.<span class="pl-c1">u32SampleRate</span><span class="pl-c1">=</span><span class="pl-c1">48000</span>;
+ <span class="pl-c">//3音频通道属性</span>
+ <span class="pl-en">RK_MPI_AI_SetChnAttr</span>(<span class="pl-c1">0</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">pstAttr</span>);
+
+<span class="pl-c">//4使能音频输入通道</span>
+  <span class="pl-en">RK_MPI_AI_EnableChn</span>(<span class="pl-c1">0</span>);
+    <span class="pl-c">//编码2、填充音频编码通道属性</span>
+  <span class="pl-smi">AENC_CHN_ATTR_S</span> <span class="pl-s1">aencpstAttr</span> <span class="pl-c1">=</span>{<span class="pl-c1">0</span>};
+  <span class="pl-s1">aencpstAttr</span>.<span class="pl-c1">enCodecType</span><span class="pl-c1">=</span> <span class="pl-c1">RK_CODEC_TYPE_MP3</span>;
+  <span class="pl-s1">aencpstAttr</span>.<span class="pl-c1">stAencMP3</span>.<span class="pl-c1">u32Channels</span><span class="pl-c1">=</span> <span class="pl-c1">2</span>;<span class="pl-c">//编码通道</span>
+  <span class="pl-s1">aencpstAttr</span>.<span class="pl-c1">stAencMP3</span>.<span class="pl-c1">u32SampleRate</span><span class="pl-c1">=</span> <span class="pl-c1">48000</span>;<span class="pl-c">//采样率</span>
+  <span class="pl-s1">aencpstAttr</span>.<span class="pl-c1">u32Bitrate</span><span class="pl-c1">=</span> <span class="pl-c1">64000</span>;<span class="pl-c">//比特率----参考的官方的</span>
+  <span class="pl-s1">aencpstAttr</span>.<span class="pl-c1">u32Quality</span><span class="pl-c1">=</span> <span class="pl-c1">1</span>;<span class="pl-c">//编码质量----参考官方的</span>
+  
+
+  <span class="pl-c">//编码1、创建音频编码通道</span>
+  <span class="pl-en">RK_MPI_AENC_CreateChn</span>(<span class="pl-c1">0</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">aencpstAttr</span>);
+  <span class="pl-c">//编码3、绑定音频输入通道和音频编码通道</span>
+  <span class="pl-smi">MPP_CHN_S</span> <span class="pl-s1">pstSrcChn</span><span class="pl-c1">=</span>{<span class="pl-c1">0</span>};
+  <span class="pl-s1">pstSrcChn</span>.<span class="pl-c1">enModId</span><span class="pl-c1">=</span><span class="pl-c1">RK_ID_AI</span>;
+  <span class="pl-s1">pstSrcChn</span>.<span class="pl-c1">s32ChnId</span><span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+  <span class="pl-s1">pstSrcChn</span>.<span class="pl-c1">s32DevId</span><span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+  <span class="pl-smi">MPP_CHN_S</span> <span class="pl-s1">pstDestChn</span><span class="pl-c1">=</span>{<span class="pl-c1">0</span>};
+  <span class="pl-s1">pstDestChn</span>.<span class="pl-c1">enModId</span><span class="pl-c1">=</span><span class="pl-c1">RK_ID_AENC</span>;
+  <span class="pl-s1">pstDestChn</span>.<span class="pl-c1">s32ChnId</span><span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+  <span class="pl-s1">pstDestChn</span>.<span class="pl-c1">s32DevId</span><span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+  <span class="pl-en">RK_MPI_SYS_Bind</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">pstSrcChn</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">pstDestChn</span>);
+
+
+  <span class="pl-c">//5开启音频流</span>
+  <span class="pl-en">RK_MPI_AI_StartStream</span>(<span class="pl-c1">0</span>);
+  <span class="pl-c">//7定义多媒体内容</span>
+  <span class="pl-smi">MEDIA_BUFFER</span> <span class="pl-s1">mb</span> <span class="pl-c1">=</span><span class="pl-c1">NULL</span>;
+  <span class="pl-smi">uint8_t</span> <span class="pl-c1">*</span><span class="pl-s1">data</span> <span class="pl-c1">=</span><span class="pl-c1">NULL</span>;
+  <span class="pl-smi">size_t</span> <span class="pl-s1">lenth</span> <span class="pl-c1">=</span><span class="pl-c1">0</span>;
+  <span class="pl-c">//10打开保存的文件</span>
+  <span class="pl-c">//FILE *fp=fopen("./zyl_ai.pcm","w");</span>
+  <span class="pl-c">//编码4、换成mp3后缀</span>
+  <span class="pl-smi">FILE</span> <span class="pl-c1">*</span><span class="pl-s1">fp</span><span class="pl-c1">=</span><span class="pl-en">fopen</span>(<span class="pl-s">"./zyl_ai.mp3"</span>,<span class="pl-s">"w"</span>);
+  <span class="pl-c">//通过时间结束循环</span>
+  <span class="pl-smi">time_t</span> <span class="pl-s1">begin_tim</span> <span class="pl-c1">=</span><span class="pl-en">time</span>(<span class="pl-c1">NULL</span>);
+  <span class="pl-smi">time_t</span> <span class="pl-s1">end_tim</span>;
+  <span class="pl-k">while</span>(<span class="pl-c1">1</span>)
+  {
+    <span class="pl-s1">end_tim</span><span class="pl-c1">=</span><span class="pl-en">time</span>(<span class="pl-c1">NULL</span>);
+    <span class="pl-k">if</span>(<span class="pl-s1">end_tim</span><span class="pl-c1">-</span><span class="pl-s1">begin_tim</span>&gt;=<span class="pl-c1">10</span>)
+    <span class="pl-k">break</span>;
+    <span class="pl-c">//6获取多媒体内容</span>
+    <span class="pl-c">//mb=RK_MPI_SYS_GetMediaBuffer(RK_ID_AI,0,-1);</span>
+    <span class="pl-c">//编码5、从AENC通道获取</span>
+    <span class="pl-s1">mb</span><span class="pl-c1">=</span><span class="pl-en">RK_MPI_SYS_GetMediaBuffer</span>(<span class="pl-c1">RK_ID_AENC</span>,<span class="pl-c1">0</span>,<span class="pl-c1">-1</span>);
+    <span class="pl-c">//8从媒体缓冲区获取数据指针</span>
+    <span class="pl-s1">data</span><span class="pl-c1">=</span><span class="pl-en">RK_MPI_MB_GetPtr</span>(<span class="pl-s1">mb</span>);
+    <span class="pl-c">//9获取媒体缓冲区中数据的大小。</span>
+    <span class="pl-s1">lenth</span><span class="pl-c1">=</span><span class="pl-en">RK_MPI_MB_GetSize</span>(<span class="pl-s1">mb</span>);
+    <span class="pl-c">//11写入文件</span>
+    <span class="pl-en">fwrite</span>(<span class="pl-s1">data</span>,<span class="pl-c1">1</span>,<span class="pl-s1">lenth</span>,<span class="pl-s1">fp</span>);
+    <span class="pl-en">fflush</span>(<span class="pl-s1">fp</span>);
+    <span class="pl-c">//12释放多媒体内容</span>
+    <span class="pl-en">RK_MPI_MB_ReleaseBuffer</span>(<span class="pl-s1">mb</span>);
+  }
+  <span class="pl-en">fclose</span>(<span class="pl-s1">fp</span>);
+  <span class="pl-en">RK_MPI_SYS_UnBind</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">pstSrcChn</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">pstDestChn</span>);
+  <span class="pl-en">RK_MPI_AI_DisableChn</span>(<span class="pl-c1">0</span>);<span class="pl-c">//禁用音频输入通道。</span>
+  <span class="pl-en">RK_MPI_AENC_DestroyChn</span>(<span class="pl-c1">0</span>);<span class="pl-c">//销毁音频编码通道。</span>
+  <span class="pl-c">//system("chmod 777 ./zyl_ai.pcm");</span>
+  <span class="pl-en">system</span>(<span class="pl-s">"chmod 777 ./zyl_ai.mp3"</span>);
+  <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h1>7月30日</h1>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+
+<span class="pl-k">#include</span> <span class="pl-s">"sample_common.h"</span>
+<span class="pl-k">#include</span> <span class="pl-s">"rkmedia_api.h"</span>
+<span class="pl-k">#include</span> <span class="pl-s">"rkmedia_venc.h"</span>
+
+<span class="pl-k">typedef</span> <span class="pl-k">struct</span> <span class="pl-smi">rkMuxerHandle</span> {
+  <span class="pl-smi">RK_U32</span> <span class="pl-c1">u32ModeIdx</span>;
+  <span class="pl-smi">RK_U32</span> <span class="pl-c1">u32ChnIdx</span>;
+} <span class="pl-smi">MuxerHandle</span>;
+
+<span class="pl-smi">void</span> <span class="pl-en">myEventCbFunc</span>(<span class="pl-smi">RK_VOID</span> <span class="pl-c1">*</span><span class="pl-s1">pHandle</span>, <span class="pl-smi">RK_VOID</span> <span class="pl-c1">*</span><span class="pl-s1">event</span>)
+{
+    <span class="pl-s1">pHandle</span> <span class="pl-c1">=</span> <span class="pl-s1">pHandle</span>;
+    <span class="pl-s1">event</span> <span class="pl-c1">=</span> <span class="pl-s1">event</span>;
+    <span class="pl-c">// RK_S32 s32ModeIdx = -1;</span>
+    <span class="pl-c">// RK_S32 s32ChnIdx = -1;</span>
+    <span class="pl-c">// if (pHandle) {</span>
+        
+    <span class="pl-c">//     MuxerHandle *pstMuxerHandle = (MuxerHandle *)pHandle;</span>
+    <span class="pl-c">//     s32ModeIdx = (RK_S32)pstMuxerHandle-&gt;u32ModeIdx;</span>
+    <span class="pl-c">//     s32ChnIdx = (RK_S32)pstMuxerHandle-&gt;u32ChnIdx;</span>
+    <span class="pl-c">// }</span>
+    <span class="pl-c">// if (event) {</span>
+    <span class="pl-c">//     MUXER_EVENT_INFO_S *pstMuxerEvent = (MUXER_EVENT_INFO_S *)event;</span>
+    <span class="pl-c">//     pstMuxerEvent = pstMuxerEvent;</span>
+    <span class="pl-c">// }</span>
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>(<span class="pl-smi">void</span>)
+{
+    <span class="pl-smi">rk_aiq_working_mode_t</span> <span class="pl-s1">hdr_mode</span> <span class="pl-c1">=</span> <span class="pl-c1">RK_AIQ_WORKING_MODE_NORMAL</span>;
+    <span class="pl-smi">int</span> <span class="pl-s1">fps</span> <span class="pl-c1">=</span> <span class="pl-c1">30</span>;
+    <span class="pl-en">SAMPLE_COMM_ISP_Init</span>(<span class="pl-c1">0</span>, <span class="pl-s1">hdr_mode</span>, <span class="pl-c1">RK_FALSE</span>, <span class="pl-s">"/oem/etc/iqfiles"</span>);
+    <span class="pl-en">SAMPLE_COMM_ISP_Run</span>(<span class="pl-c1">0</span>);
+    <span class="pl-en">SAMPLE_COMM_ISP_SetFrameRate</span>(<span class="pl-c1">0</span>, <span class="pl-s1">fps</span>);
+    <span class="pl-c">//1、初始化系统</span>
+    <span class="pl-en">RK_MPI_SYS_Init</span>();
+    
+    <span class="pl-c">//3、填充VI通道属性</span>
+    <span class="pl-smi">VI_CHN_ATTR_S</span> <span class="pl-s1">video_pstDstChnAttr</span> <span class="pl-c1">=</span> {<span class="pl-c1">0</span>};
+    <span class="pl-s1">video_pstDstChnAttr</span>.<span class="pl-c1">enBufType</span> <span class="pl-c1">=</span> <span class="pl-c1">VI_CHN_BUF_TYPE_MMAP</span>;    <span class="pl-c">//数据传输模式</span>
+    <span class="pl-s1">video_pstDstChnAttr</span>.<span class="pl-c1">enPixFmt</span> <span class="pl-c1">=</span> <span class="pl-c1">IMAGE_TYPE_NV12</span>;     <span class="pl-c">//图像格式</span>
+    <span class="pl-s1">video_pstDstChnAttr</span>.<span class="pl-c1">enWorkMode</span> <span class="pl-c1">=</span> <span class="pl-c1">VI_WORK_MODE_NORMAL</span>;   <span class="pl-c">//工作模式</span>
+    <span class="pl-s1">video_pstDstChnAttr</span>.<span class="pl-c1">pcVideoNode</span> <span class="pl-c1">=</span> <span class="pl-s">"rkispp_scale0"</span>;  <span class="pl-c">//节点路径</span>
+    <span class="pl-c">//V4L2摄像头开发中用到的知识 3～5</span>
+    <span class="pl-s1">video_pstDstChnAttr</span>.<span class="pl-c1">u32BufCnt</span> <span class="pl-c1">=</span> <span class="pl-c1">3</span>;    <span class="pl-c">//缓冲区个数</span>
+    <span class="pl-s1">video_pstDstChnAttr</span>.<span class="pl-c1">u32Height</span> <span class="pl-c1">=</span> <span class="pl-c1">768</span>;    <span class="pl-c">//图像宽度</span>
+    <span class="pl-s1">video_pstDstChnAttr</span>.<span class="pl-c1">u32Width</span> <span class="pl-c1">=</span> <span class="pl-c1">1024</span>;     <span class="pl-c">//图像高度</span>
+    <span class="pl-c">//2、设置VI通道属性</span>
+    <span class="pl-en">RK_MPI_VI_SetChnAttr</span>(<span class="pl-c1">0</span>,<span class="pl-c1">0</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">video_pstDstChnAttr</span>);
+    <span class="pl-c">//4、启用VI通道</span>
+    <span class="pl-en">RK_MPI_VI_EnableChn</span>(<span class="pl-c1">0</span>,<span class="pl-c1">0</span>);
+
+    <span class="pl-c">//6、编码器核心结构体创建</span>
+    <span class="pl-smi">VENC_CHN_ATTR_S</span> <span class="pl-s1">stVencChnAttr</span> <span class="pl-c1">=</span> {<span class="pl-c1">0</span>};
+    <span class="pl-c">//选择固定码率</span>
+    <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stRcAttr</span>.<span class="pl-c1">enRcMode</span> <span class="pl-c1">=</span> <span class="pl-c1">VENC_RC_MODE_H264CBR</span>;
+    <span class="pl-c">//目标图像的分母</span>
+    <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stRcAttr</span>.<span class="pl-c1">stH264Cbr</span>.<span class="pl-c1">fr32DstFrameRateDen</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+    <span class="pl-c">//目标图像的分子</span>
+    <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stRcAttr</span>.<span class="pl-c1">stH264Cbr</span>.<span class="pl-c1">fr32DstFrameRateNum</span> <span class="pl-c1">=</span> <span class="pl-c1">30</span>;
+    <span class="pl-c">//比特率 --- 图像的长*图像的宽</span>
+    <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stRcAttr</span>.<span class="pl-c1">stH264Cbr</span>.<span class="pl-c1">u32BitRate</span> <span class="pl-c1">=</span> <span class="pl-c1">1024</span><span class="pl-c1">*</span><span class="pl-c1">768</span>;
+    <span class="pl-c">//I帧间隔</span>
+    <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stRcAttr</span>.<span class="pl-c1">stH264Cbr</span>.<span class="pl-c1">u32Gop</span> <span class="pl-c1">=</span> <span class="pl-c1">30</span>;
+    <span class="pl-c">//源图像的分母</span>
+    <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stRcAttr</span>.<span class="pl-c1">stH264Cbr</span>.<span class="pl-c1">u32SrcFrameRateDen</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+    <span class="pl-c">//源图像的分子</span>
+    <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stRcAttr</span>.<span class="pl-c1">stH264Cbr</span>.<span class="pl-c1">u32SrcFrameRateNum</span> <span class="pl-c1">=</span> <span class="pl-c1">30</span>;
+
+    <span class="pl-c">//使用的编码器</span>
+    <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stVencAttr</span>.<span class="pl-c1">enType</span> <span class="pl-c1">=</span> <span class="pl-c1">RK_CODEC_TYPE_H264</span>;
+    <span class="pl-c">//输入图像类型</span>
+    <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stVencAttr</span>.<span class="pl-c1">imageType</span> <span class="pl-c1">=</span> <span class="pl-c1">IMAGE_TYPE_NV12</span>;
+    <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stVencAttr</span>.<span class="pl-c1">u32PicHeight</span> <span class="pl-c1">=</span> <span class="pl-c1">768</span>;
+    <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stVencAttr</span>.<span class="pl-c1">u32PicWidth</span> <span class="pl-c1">=</span> <span class="pl-c1">1024</span>;
+    <span class="pl-c">//编码等级 --- 正常</span>
+    <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stVencAttr</span>.<span class="pl-c1">u32Profile</span> <span class="pl-c1">=</span> <span class="pl-c1">77</span>;
+    <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stVencAttr</span>.<span class="pl-c1">u32VirHeight</span> <span class="pl-c1">=</span> <span class="pl-c1">768</span>;
+    <span class="pl-s1">stVencChnAttr</span>.<span class="pl-c1">stVencAttr</span>.<span class="pl-c1">u32VirWidth</span> <span class="pl-c1">=</span> <span class="pl-c1">1024</span>;
+    <span class="pl-c">//5、创建编码通道</span>
+    <span class="pl-en">RK_MPI_VENC_CreateChn</span>(<span class="pl-c1">0</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">stVencChnAttr</span>);
+
+    <span class="pl-c">//7、数据来源通道</span>
+    <span class="pl-smi">MPP_CHN_S</span> <span class="pl-s1">video_pstDstChn</span> <span class="pl-c1">=</span> {<span class="pl-c1">0</span>};
+    <span class="pl-c">//推流数据来自VENC</span>
+    <span class="pl-s1">video_pstDstChn</span>.<span class="pl-c1">enModId</span> <span class="pl-c1">=</span> <span class="pl-c1">RK_ID_VENC</span>;
+    <span class="pl-s1">video_pstDstChn</span>.<span class="pl-c1">s32ChnId</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-c">//当前只有通道0</span>
+    <span class="pl-s1">video_pstDstChn</span>.<span class="pl-c1">s32DevId</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-smi">MPP_CHN_S</span> <span class="pl-s1">video_pstSrcChn</span> <span class="pl-c1">=</span> {<span class="pl-c1">0</span>};
+    <span class="pl-s1">video_pstSrcChn</span>.<span class="pl-c1">enModId</span> <span class="pl-c1">=</span> <span class="pl-c1">RK_ID_VI</span>;
+    <span class="pl-s1">video_pstSrcChn</span>.<span class="pl-c1">s32ChnId</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-s1">video_pstSrcChn</span>.<span class="pl-c1">s32DevId</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-c">//8、绑定 --- 将VI和VENC建立联系</span>
+    <span class="pl-en">RK_MPI_SYS_Bind</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">video_pstSrcChn</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">video_pstDstChn</span>);
+
+    <span class="pl-c">///////////////////////////////////////</span>
+    <span class="pl-c">//10.音频通道属性</span>
+    <span class="pl-smi">AI_CHN_ATTR_S</span> <span class="pl-s1">pstAttr</span> <span class="pl-c1">=</span> {<span class="pl-c1">0</span>};
+    <span class="pl-s1">pstAttr</span>.<span class="pl-c1">enAiLayout</span> <span class="pl-c1">=</span> <span class="pl-c1">AI_LAYOUT_NORMAL</span>;<span class="pl-c">//正常输入类型</span>
+    <span class="pl-s1">pstAttr</span>.<span class="pl-c1">enSampleFormat</span> <span class="pl-c1">=</span> <span class="pl-c1">RK_SAMPLE_FMT_S16</span>;<span class="pl-c">//音频输入格式-----没有经过编码也称之为PCM</span>
+    <span class="pl-s1">pstAttr</span>.<span class="pl-c1">pcAudioNode</span> <span class="pl-c1">=</span> <span class="pl-s">"plughw:1,0"</span>;<span class="pl-c">//使用的声卡</span>
+    <span class="pl-s1">pstAttr</span>.<span class="pl-c1">u32Channels</span> <span class="pl-c1">=</span> <span class="pl-c1">2</span>;<span class="pl-c">//通道数---双声道</span>
+    <span class="pl-s1">pstAttr</span>.<span class="pl-c1">u32NbSamples</span> <span class="pl-c1">=</span> <span class="pl-c1">1152</span>;<span class="pl-c">//每帧的采样点个数 --- 常用的1024和1152，分别代表了不同的音频质量</span>
+    <span class="pl-s1">pstAttr</span>.<span class="pl-c1">u32SampleRate</span> <span class="pl-c1">=</span> <span class="pl-c1">48000</span>;<span class="pl-c">//采样率</span>
+    <span class="pl-c">//9.设置音频输入通道属性</span>
+    <span class="pl-en">RK_MPI_AI_SetChnAttr</span>(<span class="pl-c1">0</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">pstAttr</span>);
+
+    <span class="pl-c">//11.使能音频输入通道</span>
+    <span class="pl-en">RK_MPI_AI_EnableChn</span>(<span class="pl-c1">0</span>);
+
+    <span class="pl-c">//13、填充编码通道属性</span>
+    <span class="pl-smi">AENC_CHN_ATTR_S</span> <span class="pl-s1">aencpstAttr</span> <span class="pl-c1">=</span> {<span class="pl-c1">0</span>};
+    <span class="pl-c">//编码格式</span>
+    
+    <span class="pl-s1">aencpstAttr</span>.<span class="pl-c1">enCodecType</span> <span class="pl-c1">=</span> <span class="pl-c1">RK_CODEC_TYPE_MP2</span>;
+    <span class="pl-s1">aencpstAttr</span>.<span class="pl-c1">stAencMP2</span>.<span class="pl-c1">u32Channels</span> <span class="pl-c1">=</span> <span class="pl-c1">2</span>;
+    <span class="pl-s1">aencpstAttr</span>.<span class="pl-c1">stAencMP2</span>.<span class="pl-c1">u32SampleRate</span> <span class="pl-c1">=</span> <span class="pl-c1">48000</span>;
+    <span class="pl-s1">aencpstAttr</span>.<span class="pl-c1">u32Bitrate</span> <span class="pl-c1">=</span> <span class="pl-c1">64000</span>;<span class="pl-c">//比特率</span>
+    <span class="pl-s1">aencpstAttr</span>.<span class="pl-c1">u32Quality</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;<span class="pl-c">//编码质量</span>
+    <span class="pl-c">//12、创建音频编码通道</span>
+    <span class="pl-en">RK_MPI_AENC_CreateChn</span>(<span class="pl-c1">0</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">aencpstAttr</span>);
+
+    <span class="pl-c">//14、绑定音频输入和音频编码通道</span>
+    <span class="pl-smi">MPP_CHN_S</span> <span class="pl-s1">pstSrcChn</span> <span class="pl-c1">=</span> {<span class="pl-c1">0</span>};
+    <span class="pl-s1">pstSrcChn</span>.<span class="pl-c1">enModId</span> <span class="pl-c1">=</span> <span class="pl-c1">RK_ID_AI</span>;
+    <span class="pl-s1">pstSrcChn</span>.<span class="pl-c1">s32ChnId</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-s1">pstSrcChn</span>.<span class="pl-c1">s32DevId</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-smi">MPP_CHN_S</span> <span class="pl-s1">pstDestChn</span> <span class="pl-c1">=</span> {<span class="pl-c1">0</span>};
+    <span class="pl-s1">pstDestChn</span>.<span class="pl-c1">enModId</span> <span class="pl-c1">=</span> <span class="pl-c1">RK_ID_AENC</span>;
+    <span class="pl-s1">pstDestChn</span>.<span class="pl-c1">s32ChnId</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-s1">pstDestChn</span>.<span class="pl-c1">s32DevId</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-en">RK_MPI_SYS_Bind</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">pstSrcChn</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">pstDestChn</span>);
+
+    <span class="pl-c">//new2、合成器属性填充</span>
+    <span class="pl-smi">MUXER_CHN_ATTR_S</span> <span class="pl-s1">muxer_pstAttr</span> <span class="pl-c1">=</span> {<span class="pl-c1">0</span>};
+    <span class="pl-c">//自动分割</span>
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">enMode</span> <span class="pl-c1">=</span> <span class="pl-c1">MUXER_MODE_AUTOSPLIT</span>;
+    <span class="pl-c">//合成后的格式</span>
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">enType</span> <span class="pl-c1">=</span> <span class="pl-c1">MUXER_TYPE_MP4</span>;
+    <span class="pl-c">//合成器的ID</span>
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">u32MuxerId</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+
+    <span class="pl-c">//自动分割相关属性</span>
+    <span class="pl-c">//通过时间分割</span>
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stSplitAttr</span>.<span class="pl-c1">enSplitType</span> <span class="pl-c1">=</span> <span class="pl-c1">MUXER_SPLIT_TYPE_TIME</span>;
+    <span class="pl-c">//30秒分割一次</span>
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stSplitAttr</span>.<span class="pl-c1">u32TimeLenSec</span> <span class="pl-c1">=</span> <span class="pl-c1">30</span>;
+    <span class="pl-c">//命名方式 --- 自动</span>
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stSplitAttr</span>.<span class="pl-c1">enSplitNameType</span> <span class="pl-c1">=</span> <span class="pl-c1">MUXER_SPLIT_NAME_TYPE_AUTO</span>;
+    <span class="pl-c">//自动命名的前缀</span>
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stSplitAttr</span>.<span class="pl-c1">stNameAutoAttr</span>.<span class="pl-c1">pcPrefix</span> <span class="pl-c1">=</span> <span class="pl-s">"muxer_test"</span>;
+    <span class="pl-c">//自动命名的起始下标</span>
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stSplitAttr</span>.<span class="pl-c1">stNameAutoAttr</span>.<span class="pl-c1">u16StartIdx</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+    <span class="pl-c">//视频保存的路径</span>
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stSplitAttr</span>.<span class="pl-c1">stNameAutoAttr</span>.<span class="pl-c1">pcBaseDir</span> <span class="pl-c1">=</span> <span class="pl-s">"./"</span>;
+    <span class="pl-c">//时间戳</span>
+    <span class="pl-c">// muxer_pstAttr.stSplitAttr.stNameAutoAttr.bTimeStampEnable = RK_TRUE;</span>
+    
+    <span class="pl-c">//设置视频流参数</span>
+
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stVideoStreamParam</span>.<span class="pl-c1">enCodecType</span> <span class="pl-c1">=</span> <span class="pl-c1">RK_CODEC_TYPE_H264</span>;
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stVideoStreamParam</span>.<span class="pl-c1">enImageType</span> <span class="pl-c1">=</span> <span class="pl-c1">IMAGE_TYPE_NV12</span>;
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stVideoStreamParam</span>.<span class="pl-c1">u16Fps</span> <span class="pl-c1">=</span> <span class="pl-c1">30</span>;
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stVideoStreamParam</span>.<span class="pl-c1">u16Level</span> <span class="pl-c1">=</span> <span class="pl-c1">41</span>;     <span class="pl-c">//来自官方</span>
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stVideoStreamParam</span>.<span class="pl-c1">u16Profile</span> <span class="pl-c1">=</span> <span class="pl-c1">77</span>;
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stVideoStreamParam</span>.<span class="pl-c1">u32BitRate</span> <span class="pl-c1">=</span> <span class="pl-c1">1024</span><span class="pl-c1">*</span><span class="pl-c1">768</span>;
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stVideoStreamParam</span>.<span class="pl-c1">u32Height</span> <span class="pl-c1">=</span> <span class="pl-c1">768</span>;
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stVideoStreamParam</span>.<span class="pl-c1">u32Width</span> <span class="pl-c1">=</span> <span class="pl-c1">1024</span>;
+
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stAudioStreamParam</span>.<span class="pl-c1">enCodecType</span> <span class="pl-c1">=</span> <span class="pl-c1">RK_CODEC_TYPE_MP2</span>;
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stAudioStreamParam</span>.<span class="pl-c1">enSampFmt</span> <span class="pl-c1">=</span> <span class="pl-c1">RK_SAMPLE_FMT_S16</span>;
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stAudioStreamParam</span>.<span class="pl-c1">u32Channels</span> <span class="pl-c1">=</span> <span class="pl-c1">2</span>;
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stAudioStreamParam</span>.<span class="pl-c1">u32NbSamples</span> <span class="pl-c1">=</span> <span class="pl-c1">1152</span>;
+    <span class="pl-s1">muxer_pstAttr</span>.<span class="pl-c1">stAudioStreamParam</span>.<span class="pl-c1">u32SampleRate</span> <span class="pl-c1">=</span> <span class="pl-c1">48000</span>;
+    <span class="pl-c">//new1、合成器通道使能</span>
+    <span class="pl-en">RK_MPI_MUXER_EnableChn</span>(<span class="pl-c1">0</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">muxer_pstAttr</span>);
+  
+    <span class="pl-c">//new4、定义相关变量</span>
+    <span class="pl-smi">MPP_CHN_S</span> <span class="pl-s1">muxer_pstChn</span> <span class="pl-c1">=</span> {<span class="pl-c1">0</span>};
+    <span class="pl-s1">muxer_pstChn</span>.<span class="pl-c1">enModId</span> <span class="pl-c1">=</span> <span class="pl-c1">RK_ID_MUXER</span>;
+    <span class="pl-s1">muxer_pstChn</span>.<span class="pl-c1">s32ChnId</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-s1">muxer_pstChn</span>.<span class="pl-c1">s32DevId</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+
+    <span class="pl-smi">MuxerHandle</span> <span class="pl-s1">stMuxerHandle</span>;
+    <span class="pl-s1">stMuxerHandle</span>.<span class="pl-c1">u32ChnIdx</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-s1">stMuxerHandle</span>.<span class="pl-c1">u32ModeIdx</span> <span class="pl-c1">=</span> <span class="pl-c1">RK_ID_MUXER</span>;
+    <span class="pl-c">//new3、注册合成器事件回调函数</span>
+    <span class="pl-en">RK_MPI_SYS_RegisterEventCb</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">muxer_pstChn</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">stMuxerHandle</span>,\
+    <span class="pl-s1">myEventCbFunc</span>);
+
+    <span class="pl-c">//new5、开启合成器数据流</span>
+    <span class="pl-en">RK_MPI_MUXER_StreamStart</span>(<span class="pl-c1">0</span>);
+
+    <span class="pl-c">//new6、绑定视频VENC --- MUXER</span>
+    <span class="pl-smi">MUXER_CHN_S</span> <span class="pl-s1">muxer_video_pstDestChn</span> <span class="pl-c1">=</span> {<span class="pl-c1">0</span>};
+    <span class="pl-s1">muxer_video_pstDestChn</span>.<span class="pl-c1">enChnType</span> <span class="pl-c1">=</span> <span class="pl-c1">MUXER_CHN_TYPE_VIDEO</span>;
+    <span class="pl-s1">muxer_video_pstDestChn</span>.<span class="pl-c1">enModId</span> <span class="pl-c1">=</span> <span class="pl-c1">RK_ID_MUXER</span>;
+    <span class="pl-s1">muxer_video_pstDestChn</span>.<span class="pl-c1">s32ChnId</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-en">RK_MPI_MUXER_Bind</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">video_pstDstChn</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">muxer_video_pstDestChn</span>);
+    <span class="pl-c">//new7、绑定音频AENC --- MUXER</span>
+    <span class="pl-smi">MUXER_CHN_S</span> <span class="pl-s1">muxer_audio_pstDestChn</span> <span class="pl-c1">=</span> {<span class="pl-c1">0</span>};
+    <span class="pl-s1">muxer_audio_pstDestChn</span>.<span class="pl-c1">enChnType</span> <span class="pl-c1">=</span> <span class="pl-c1">MUXER_CHN_TYPE_AUDIO</span>;
+    <span class="pl-s1">muxer_audio_pstDestChn</span>.<span class="pl-c1">enModId</span> <span class="pl-c1">=</span> <span class="pl-c1">RK_ID_MUXER</span>;
+    <span class="pl-s1">muxer_audio_pstDestChn</span>.<span class="pl-c1">s32ChnId</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-en">RK_MPI_MUXER_Bind</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">pstDestChn</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">muxer_audio_pstDestChn</span>);
+    <span class="pl-smi">int</span> <span class="pl-s1">count</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-k">while</span>(<span class="pl-c1">1</span>)
+    {
+        <span class="pl-s1">count</span><span class="pl-c1">++</span>;
+        <span class="pl-en">sleep</span>(<span class="pl-c1">1</span>);
+        <span class="pl-k">if</span>(<span class="pl-s1">count</span> <span class="pl-c1">==</span> <span class="pl-c1">40</span>)
+            <span class="pl-k">break</span>;
+    }
+
+    <span class="pl-en">RK_MPI_SYS_UnBind</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">pstSrcChn</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">pstDestChn</span>);
+    <span class="pl-en">RK_MPI_AI_DisableChn</span>(<span class="pl-c1">0</span>);
+    <span class="pl-en">RK_MPI_AENC_DestroyChn</span>(<span class="pl-c1">0</span>);
+
+    <span class="pl-en">RK_MPI_SYS_UnBind</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">video_pstSrcChn</span>,<span class="pl-c1">&amp;</span><span class="pl-s1">video_pstDstChn</span>);
+	<span class="pl-en">RK_MPI_VENC_DestroyChn</span>(<span class="pl-c1">0</span>);
+	<span class="pl-en">RK_MPI_VI_DisableChn</span>(<span class="pl-c1">0</span>,<span class="pl-c1">0</span>);
+
+    <span class="pl-en">SAMPLE_COMM_ISP_Stop</span>(<span class="pl-c1">0</span>);
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div></div>
+<div style="font-size:small;margin-top:8px;float:right;"></div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://z-storm666.github.io/moss.github.io">雒河桥南的博客</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","z-storm666/moss.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekTOC.js'></script><script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>
+
+</html>
