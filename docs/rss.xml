@@ -1,5 +1,22 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>雒河桥南的博客</title><link>https://z-storm666.github.io/moss.github.io</link><description>我是雒河桥南，专注于自我提升</description><copyright>雒河桥南的博客</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://tse2-mm.cn.bing.net/th/id/OIP-C.qCys2C8LjF8c3_UHbGOooAAAAA?rs=1&amp;pid=ImgDetMain</url><title>avatar</title><link>https://z-storm666.github.io/moss.github.io</link></image><lastBuildDate>Mon, 09 Sep 2024 15:31:19 +0000</lastBuildDate><managingEditor>雒河桥南的博客</managingEditor><ttl>60</ttl><webMaster>雒河桥南的博客</webMaster><item><title>缺德网盘直链下载方法（速度提升不是很多）</title><link>https://z-storm666.github.io/moss.github.io/post/que-de-wang-pan-zhi-lian-xia-zai-fang-fa-%EF%BC%88-su-du-ti-sheng-bu-shi-hen-duo-%EF%BC%89.html</link><description>最近需要下载一些软件包，都是好几个G的大文件，厂家给的链接是缺德网盘的链接，公司电脑上没有？装一个！&#13;
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>雒河桥南的博客</title><link>https://z-storm666.github.io/moss.github.io</link><description>我是雒河桥南，专注于自我提升</description><copyright>雒河桥南的博客</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://tse2-mm.cn.bing.net/th/id/OIP-C.qCys2C8LjF8c3_UHbGOooAAAAA?rs=1&amp;pid=ImgDetMain</url><title>avatar</title><link>https://z-storm666.github.io/moss.github.io</link></image><lastBuildDate>Wed, 11 Sep 2024 14:04:48 +0000</lastBuildDate><managingEditor>雒河桥南的博客</managingEditor><ttl>60</ttl><webMaster>雒河桥南的博客</webMaster><item><title>树莓派搭建NAS服务器（OMV搭建）1</title><link>https://z-storm666.github.io/moss.github.io/post/shu-mei-pai-da-jian-NAS-fu-wu-qi-%EF%BC%88OMV-da-jian-%EF%BC%891.html</link><description>&#13;
+## **树莓派搭建NAS服务器（OMV搭建）**&#13;
+&#13;
+[OpenMediaVault](https://baike.baidu.com/item/OpenMediaVault/5404831)，是一个开源的基于[Debian](https://baike.baidu.com/item/Debian/748667?fromModule=lemma_inlink) Linux的下一代网络附加存储([NAS](https://baike.baidu.com/item/NAS/3465615?fromModule=lemma_inlink))解决方案&#13;
+&#13;
+### **准备工作**&#13;
+&#13;
+安装lite版系统（没有界面，省内存空间），烧录工具使用树莓派镜像烧录器(烧录方式参照Batocera系统的烧录过程)，烧录时要注意设置好用户名和密码以及WIFI网络（登录时，安装依赖时都会用到）&#13;
+&#13;
+&gt; https://www.raspberrypi.com/software/operating-systems/&#13;
+&gt;&#13;
+&gt;&#13;
+&gt;![](https://files.mdnice.com/user/47467/ad4fde2a-a41f-488f-ab51-266cd3b75567.png)&#13;
+&#13;
+&#13;
+**外接显示屏的情况下：**&#13;
+&#13;
+确保树莓派 WiFi 已经连上后。</description><guid isPermaLink="true">https://z-storm666.github.io/moss.github.io/post/shu-mei-pai-da-jian-NAS-fu-wu-qi-%EF%BC%88OMV-da-jian-%EF%BC%891.html</guid><pubDate>Wed, 11 Sep 2024 14:04:23 +0000</pubDate></item><item><title>缺德网盘直链下载方法（速度提升不是很多）</title><link>https://z-storm666.github.io/moss.github.io/post/que-de-wang-pan-zhi-lian-xia-zai-fang-fa-%EF%BC%88-su-du-ti-sheng-bu-shi-hen-duo-%EF%BC%89.html</link><description>最近需要下载一些软件包，都是好几个G的大文件，厂家给的链接是缺德网盘的链接，公司电脑上没有？装一个！&#13;
 &#13;
 装完了，能下载了，速度感人，几KB每秒的速度，有个30秒加速体验券，体验了发现确实挺快的，几KB每秒的速度直接飙到3、4MB每秒，嗯，结束后又变成龟速了，还友情提示购买会员加速（这套路我还不懂吗，买了会员还不行，还要超级会员，以前还可以设置共享网络带宽提速，现在不行了，为什么我知道这些？问就是我吃过亏）。</description><guid isPermaLink="true">https://z-storm666.github.io/moss.github.io/post/que-de-wang-pan-zhi-lian-xia-zai-fang-fa-%EF%BC%88-su-du-ti-sheng-bu-shi-hen-duo-%EF%BC%89.html</guid><pubDate>Mon, 09 Sep 2024 15:30:49 +0000</pubDate></item><item><title>linux杂记2</title><link>https://z-storm666.github.io/moss.github.io/post/linux-za-ji-2.html</link><description>**DTS和DTSI**&#13;
 &#13;
